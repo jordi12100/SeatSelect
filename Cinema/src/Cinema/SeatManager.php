@@ -113,6 +113,10 @@ class SeatManager
     protected function reserveSeats($seats)
     {
         foreach ($seats as $seat) {
+            if (in_array($seat, $this->chosenSeats)) {
+                throw new \InvalidArgumentException('Seat already reserved');
+            }
+
             $this->chosenSeats[] = $seat;
         }
 
