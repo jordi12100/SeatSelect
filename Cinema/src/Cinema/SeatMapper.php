@@ -2,15 +2,30 @@
 
 namespace Cinema;
 
+use Doctrine\ORM\EntityManager;
+
 class SeatMapper
 {
     /**
-     * @param int $hall
-     * @return array|null
+     * @var EntityManager
      */
-    public function getChosenSeatsBy($hall)
-    {
-        return [1, 2, 3, 4, 5];
+    protected $entityManager;
 
+    /**
+     * @param EntityManager $entityManager
+     */
+    public function __construct(EntityManager $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
+    public function findCinemaById($id)
+    {
+        return $this->getRepository()->findOneById($id);
+    }
+
+    protected function getRepository()
+    {
+        return $this->entityManager->getRepository('Cinema\Model\Cinema');
     }
 }
