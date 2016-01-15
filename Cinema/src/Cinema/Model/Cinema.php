@@ -32,21 +32,48 @@ class Cinema
      *
      * @var ArrayCollection|Seat[]
      */
-    protected $seats;
+    protected $chosenSeats;
+
+    /**
+     * @ORM\Column(type="integer")
+     *
+     * @var integer
+     */
+    protected $amountOfSeats;
 
     /**
      * @param string $name
+     * @param int $amountOfSeats
      */
-    public function __construct($name)
+    public function __construct($name, $amountOfSeats)
     {
         $this->name = $name;
+        $this->amountOfSeats = $amountOfSeats;
+
+        $this->chosenSeats = new ArrayCollection;
     }
 
     /**
-     * @return ArrayCollection|Seat[]
+     * @return string
      */
-    public function getSeats()
+    public function getName()
     {
-        return $this->seats;
+        return $this->name;
+    }
+
+    /**
+     * @return Seat[]|ArrayCollection
+     */
+    public function getChosenSeats()
+    {
+        return $this->chosenSeats;
+    }
+
+    /**
+     * @return int
+     */
+    public function getAmountOfSeats()
+    {
+        return $this->amountOfSeats;
     }
 }

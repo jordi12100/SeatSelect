@@ -5,9 +5,9 @@ namespace Cinema;
 class SeatManager
 {
     /**
-     * @var array
+     * @var int
      */
-    protected $seats = [];
+    protected $amountOfSeats;
 
     /**
      * @var array
@@ -15,12 +15,12 @@ class SeatManager
     protected $chosenSeats = [];
 
     /**
-     * @param array $seats
+     * @param int $amountOfSeats
      * @param array $chosenSeats
      */
-    public function __construct($seats, $chosenSeats = [])
+    public function __construct($amountOfSeats, $chosenSeats = [])
     {
-        $this->seats = $seats;
+        $this->amountOfSeats = $amountOfSeats;
         $this->chosenSeats = $chosenSeats;
     }
 
@@ -103,7 +103,10 @@ class SeatManager
      */
     protected function getAvailableSeats()
     {
-        return array_diff($this->seats, $this->chosenSeats);
+        return array_diff(
+            range(1, $this->amountOfSeats),
+            $this->chosenSeats
+        );
     }
 
     /**

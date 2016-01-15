@@ -27,7 +27,7 @@ class Seat
     protected $number;
 
     /**
-     * @ORM\ManyToOne(targetEntity="Cinema\Model\Cinema", inversedBy="seats")
+     * @ORM\ManyToOne(targetEntity="Cinema\Model\Cinema", inversedBy="chosenSeats")
      * @ORM\JoinColumn(name="cinemaId", referencedColumnName="id")
      * @var Cinema|null
      */
