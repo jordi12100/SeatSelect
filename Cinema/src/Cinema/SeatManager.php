@@ -46,15 +46,17 @@ class SeatManager
         $seatNumbers = [];
         while (count($this->availableSeats) > 0) {
             $bestSeats = $this->findBestSeatsFor($find);
+            if (!count($bestSeats)) {
+                $find -= 1;
+                continue;
+            }
+
             $seatNumbers = array_merge($seatNumbers, $bestSeats);
-
-            $find = count($bestSeats)
-                ? $visitors - count($seatNumbers)
-                : $find - 1;
-
             if (count($seatNumbers) === $visitors) {
                 break;
             }
+
+            $find = $visitors - count($seatNumbers);
         }
 
         return $seatNumbers;

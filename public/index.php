@@ -31,7 +31,6 @@ $selectedSeats = $seatManager->getSeatNumbers($visitors);
     <p>Kon geen plaatsen vinden voor <?=$visitors?> bezoekers.</p>
 <?php endif;?>
 
-<?php exit;?>
 <?php foreach (range(1, $cinema->getAmountOfSeats()) as $seat): ?>
     <?php
     if (in_array($seat, $chosenSeats)):
