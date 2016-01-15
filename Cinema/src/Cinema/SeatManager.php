@@ -5,14 +5,9 @@ namespace Cinema;
 class SeatManager
 {
     /**
-     * @var int
-     */
-    protected $amountOfSeats;
-
-    /**
      * @var array
      */
-    protected $chosenSeats = [];
+    protected $availableSeats = [];
 
     /**
      * @param int $amountOfSeats
@@ -20,8 +15,10 @@ class SeatManager
      */
     public function __construct($amountOfSeats, $chosenSeats = [])
     {
-        $this->amountOfSeats = $amountOfSeats;
-        $this->chosenSeats = $chosenSeats;
+        $this->availableSeats = array_diff(
+            range(1, $amountOfSeats),
+            $chosenSeats
+        );
     }
 
     /**
@@ -30,44 +27,64 @@ class SeatManager
      */
     public function getSeatNumbers($visitors)
     {
+        if ($visitors > count($this->availableSeats)) {
+            return null;
+        }
+
         $seatNumbers = $this->getBestSeatNumbers($visitors);
         return count($seatNumbers) === $visitors ? $seatNumbers : null;
     }
 
     /**
      * @param int $visitors
-     * @param null|int $seats
      * @return array
      */
-    protected function getBestSeatNumbers($visitors, $seats = null)
+    protected function getBestSeatNumbers($visitors)
     {
-        $seats = $seats ?: $visitors;
+        $find = $visitors;
 
-        $bestSeats = $this->findBestSeatsFor($this->getAvailableSeats(), $seats);
-        if (count($bestSeats) !== $visitors && count($this->getAvailableSeats()) > 0) {
-            $bestSeats = array_merge($bestSeats, $this->getBestSeatNumbers($seats, $visitors-1 ?: 1));
+        $seatNumbers = [];
+        while (count($this->availableSeats) > 0) {
+            $bestSeats = $this->findBestSeatsFor($find);
+            $seatNumbers = array_merge($seatNumbers, $bestSeats);
+
+            $find = count($bestSeats)
+                ? $visitors - count($seatNumbers)
+                : $find - 1;
+
+            if (count($seatNumbers) === $visitors) {
+                break;
+            }
         }
 
-        return $bestSeats;
+        return $seatNumbers;
     }
 
     /**
-     * @param array $availableSeats
      * @param int $visitors
      * @return null
      */
-    protected function findBestSeatsFor($availableSeats, $visitors)
+    protected function findBestSeatsFor($visitors)
     {
-        foreach ($availableSeats as $key => $availableSeat) {
+        $skipSeats = 0;
+        foreach ($this->availableSeats as $key => $availableSeat) {
             $start = $key + 1;
             $end = $start + ($visitors-1);
 
-            if (!$this->isRangeAvailable($start, $end)) {
+            if ($skipSeats === $start) {
+                $skipSeats -= 1;
                 continue;
             }
 
-            $this->reserveSeats(range($start, $end));
-            return range($start, $end);
+            $unavailableSeat = $this->getLastUnavailableInRange($start, $end);
+            if ($unavailableSeat !== null) {
+                $skipSeats = $unavailableSeat;
+                continue;
+            }
+
+            $seats = range($start, $end);
+            $this->reserveSeats($seats);
+            return $seats;
         }
 
         return [];
@@ -78,15 +95,15 @@ class SeatManager
      * @param int $end
      * @return bool
      */
-    protected function isRangeAvailable($start, $end)
+    protected function getLastUnavailableInRange($start, $end)
     {
-        for ($i = $start; $i <= $end; $i++) {
+        for ($i = $end; $i >= $start; $i--) {
             if (!$this->isAvailable($i)) {
-                return false;
+                return $i;
             }
         }
 
-        return true;
+        return null;
     }
 
     /**
@@ -95,32 +112,21 @@ class SeatManager
      */
     protected function isAvailable($seat)
     {
-        return in_array($seat, $this->getAvailableSeats());
-    }
-
-    /**
-     * @return array
-     */
-    protected function getAvailableSeats()
-    {
-        return array_diff(
-            range(1, $this->amountOfSeats),
-            $this->chosenSeats
-        );
+        return in_array($seat, $this->availableSeats);
     }
 
     /**
      * @param array $seats
      * @return array
+     * @throws \InvalidArgumentException
      */
     protected function reserveSeats($seats)
     {
         foreach ($seats as $seat) {
-            if (in_array($seat, $this->chosenSeats)) {
+            if (!isset($this->availableSeats[$seat-1])) {
                 throw new \InvalidArgumentException('Seat already reserved');
             }
-
-            $this->chosenSeats[] = $seat;
+            unset($this->availableSeats[$seat-1]);
         }
 
         return $seats;
