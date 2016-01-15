@@ -114,7 +114,7 @@ class SeatManager
      */
     protected function isAvailable($seat)
     {
-        return in_array($seat, $this->availableSeats);
+        return isset($this->availableSeats[$seat-1]);
     }
 
     /**
